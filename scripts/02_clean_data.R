@@ -2,7 +2,7 @@
 # Purpose: Analyzes the Toronto Apartment Building Evaluation data and generates visualizations.
 # Author: Xuanang Ren
 # Date: 26 September 2024
-# Contact: [Your Email Address]
+# Contact: ang.ren@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: The `tidyverse` package should be installed.
 # Any other information needed: The script assumes that the raw data file has been downloaded and saved in the `data/raw_data` directory.

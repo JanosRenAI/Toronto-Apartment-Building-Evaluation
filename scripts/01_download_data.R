@@ -2,7 +2,7 @@
 # Purpose: Downloads and saves the Toronto Apartment Building Evaluation data from Open Data Toronto.
 # Author: Xuanang Ren
 # Date: 26 September 2024
-# Contact: [Your Email Address]
+# Contact: ang.ren@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: `opendatatoronto` and `tidyverse` packages should be installed.
 # Any other information needed: Ensure you have the correct resource ID from Open Data Toronto.

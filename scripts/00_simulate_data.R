@@ -2,7 +2,7 @@
 # Purpose: Simulates a dataset for Toronto Apartment Building Evaluations.
 # Author: Xuanang Ren
 # Date: 26 September 2024
-# Contact: [Your Email Address]
+# Contact: ang.ren@mail.utoronto.ca
 # License: MIT
 # Pre-requisites: None. This script is self-contained and does not require external data.
 # Any other information needed: This is mock data for testing and development.
