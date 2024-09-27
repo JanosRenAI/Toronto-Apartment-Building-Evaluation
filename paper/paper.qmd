@@ -5,12 +5,13 @@ date: "26 September 2024"
 abstract: "This paper explores the Toronto Apartment Building Evaluation dataset to assess the state of apartment buildings across the city. The analysis focuses on the relationships between building evaluation scores, complaints, and building age, examining how these factors vary by neighborhood. There are significant variations in complaints based on the buildings’ age, with older buildings generally having more complaints. Additionally, there are differences in neighborhood-level, observed in evaluation scores, suggesting areas of focus for city housing improvement.."
 format: pdf
 toc : true
+bibliography: references.bib
 number-sections: true
 fig-cap: true
 warning: false
 message: false
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: inline 
 ---
 
 # Introduction
@@ -52,7 +53,7 @@ data1 <- na.omit(data)
 
 ## Raw and Cleansed Data
 
-The dataset used in this analysis is the Toronto Apartment Building Evaluation dataset, obtained from Open Data Toronto. The dataset contains detailed information on apartment buildings’ conditions across Toronto (Gelfand, 2022). This information was collected through inspection evaluations conducted by city inspectors. Cleanliness, structural integrity, and maintenance are some of the factors used in rating each building. Furthermore, the dataset consists of 3,454 observations based on the following key variables:
+The dataset used in this analysis is the Toronto Apartment Building Evaluation dataset, obtained from Open Data Toronto. The dataset contains detailed information on apartment buildings’ conditions across Toronto (@Gelfand2022). This information was collected through inspection evaluations conducted by city inspectors. Cleanliness, structural integrity, and maintenance are some of the factors used in rating each building. Furthermore, the dataset consists of 3,454 observations based on the following key variables:
 
 Building age: The age of the building is the difference between the year built and the year evaluated.
 
@@ -62,7 +63,7 @@ Neighborhood: This variable represents the location of each building categorized
 
 Complaints: This variable represents the number of issues reported by tenants for each building.
 
-The data analysis was performed using R (R Core Team, 2023). The analysis also entailed the use of the following R packages: tidyverse (Wickham et al. 2019), ggplot2 (Wickham, 2016), janitor (Sam Firke, 2023), and knitr (Xie, 2023).
+The data analysis was performed using R (@RCoreTeam2023). The analysis also entailed the use of the following R packages: tidyverse (@Wickham2019), ggplot2 (@Wickham2016), janitor (@Firke2023), and knitr (@Xie2023).
 
 Some of the data points had missing attributes whereby an “NA” was put in place of the true value. Before any analysis, these entries were removed entirely during the process of data cleaning to simplify the process.
 
@@ -168,16 +169,4 @@ One limitation of this study is that it does not account for all potential facto
 Future research could address these limitations by including additional data sources, such as building management records or tenant satisfaction surveys. Furthermore, a longitudinal analysis of changes in building conditions over time would inform on the long-term effects of maintenance and renovation efforts.
 
 # REFERENCES
-City of Toronto. (2023). Toronto Apartment Building Evaluation Dataset. Open Data Toronto.
-
-Firke, S. (2023, February 2). Simple Tools for Examining and Cleaning Dirty Data [R package janitor version 2.2.0]. https://cran.r-project.org/package=janitor
-
-Gelfand, S. (2022, April 13). Access the City of Toronto Open Data Portal [R package opendatatoronto version 0.1.5]. https://cran.r-project.org/web/packages/opendatatoronto/index.html
-
-R Core Team. (2023). R: A Language and environment for Statistical computing. Vienna, Austria: R Foundation for Statistical Computing. https://www.r-project.org/
-Wickham, H. (2016). GGPlot2: Elegant Graphics for Data Analysis. Springer-Verlag New York. https://ggplot2.tidyverse.org./
-
-Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T., Miller, E., Bache, S., Müller, K., Ooms, J., Robinson, D., Seidel, D., Spinu, V., . . . Yutani, H. (2019). Welcome to the Tidyverse. The Journal of Open Source Software, 4(43), 1686. https://doi.org/10.21105/joss.01686
-
-Xie, Y. (2023). KNITR: A General-Purpose Package for Dynamic Report Generation in R. https://yihui.org/knitr/
 
