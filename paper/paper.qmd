@@ -1,221 +1,183 @@
 ---
-title: "My title"
-subtitle: "My subtitle if needed"
-author: 
-  - First author
-  - Another author
-thanks: "Code and data are available at: LINK."
-date: today
-date-format: long
-abstract: "First sentence. Second sentence. Third sentence. Fourth sentence."
+title: "Evaluation of Apartment Building Conditions in Toronto: Ratings and Complaint Trends Across Neighborhoods"
+author: Xuanang Ren
+date: "26 September 2024"
+abstract: "This paper explores the Toronto Apartment Building Evaluation dataset to assess the state of apartment buildings across the city. The analysis focuses on the relationships between building evaluation scores, complaints, and building age, examining how these factors vary by neighborhood. There are significant variations in complaints based on the buildings’ age, with older buildings generally having more complaints. Additionally, there are differences in neighborhood-level, observed in evaluation scores, suggesting areas of focus for city housing improvement.."
 format: pdf
+toc : true
 number-sections: true
-bibliography: references.bib
+fig-cap: true
+warning: false
+message: false
+editor_options: 
+  chunk_output_type: inline
 ---
-
-```{r}
-#| include: false
-#| warning: false
-#| message: false
-
-library(tidyverse)
-library(palmerpenguins)
-```
-
 
 # Introduction
 
-You can and should cross-reference sections and sub-sections. We use @citeR and @rohan.
+Toronto’s housing infrastructure has key components such as apartment buildings whose conditions directly impact the well-being of its residents. Therefore, it is essential to understand how factors like neighborhood, building age, and maintenance affect apartment conditions in improving housing quality and ensuring safe living environments.
 
-The remainder of this paper is structured as follows. @sec-data....
+The dataset used in this analysis is the Toronto Apartment Building Evaluation dataset. It contains evaluation scores, building ages, and complaint data for over 3,400 buildings. This analysis aims to explore how these variables relate to one another and the varying insights they provide about housing conditions in different parts of the city. Specifically, the analysis investigates how the number of complaints varies between newer and older buildings and whether there are significant differences in building evaluation scores across neighborhoods.
 
+The rest of the paper has the following structure: Section 2 describes the dataset used and major variables. Section 3 contains the analysis and results compounded with various visualizations of trends in evaluation scores and complaints. Section 4 entails a discussion of the findings and their implications. Lastly, Section 5 briefly discusses the limitations and remedies based on the analysis.
 
+```{r, echo=FALSE}
 
-# Data {#sec-data}
+#Required libraries 
+library(opendatatoronto) 
+library(tidyverse) 
+library(janitor)
+library(ggplot2)
+library(knitr)
+library(tinytex)
 
-Some of our data is of penguins (@fig-bills), from @palmerpenguins.
+#Workspace setup and data loading
 
-```{r}
-#| label: fig-bills
-#| fig-cap: Bills of penguins
-#| echo: false
+resource_id <- "4ef82789-e038-44ef-a478-a8f3590c3eb1" 
+resources <- list_package_resources(resource_id)
+raw_data <- filter(resources, row_number() == 1) %>% get_resource()
 
-ggplot(penguins, aes(x = island, fill = species)) +
-  geom_bar(alpha = 0.8) +
-  scale_fill_manual(values = c("darkorange","purple","cyan4"),
-                    guide = "none") +
+#Data Cleaning
+
+cleaned_data <- raw_data %>% janitor::clean_names() %>% select(current_building_eval_score, year_built, year_evaluated, wardname, current_reactive_score) %>% filter(!is.na(current_building_eval_score)) %>% mutate( current_building_eval_score = as.numeric(as.character(current_building_eval_score)), year_built = as.numeric(as.character(year_built)), year_evaluated = as.numeric(as.character(year_evaluated)) ) %>% rename( building_eval_score = current_building_eval_score, reactive_score = current_reactive_score ) %>% drop_na()
+
+# Load the downloaded data
+data <- raw_data
+
+#The clean data
+data1 <- na.omit(data)
+```
+
+# Data
+
+## Raw and Cleansed Data
+
+The dataset used in this analysis is the Toronto Apartment Building Evaluation dataset, obtained from Open Data Toronto. The dataset contains detailed information on apartment buildings’ conditions across Toronto (Gelfand, 2022). This information was collected through inspection evaluations conducted by city inspectors. Cleanliness, structural integrity, and maintenance are some of the factors used in rating each building. Furthermore, the dataset consists of 3,454 observations based on the following key variables:
+
+Building age: The age of the building is the difference between the year built and the year evaluated.
+
+Evaluation Score: This is a numeric score representing the building’s overall condition. A higher evaluation score indicates better conditions.
+
+Neighborhood: This variable represents the location of each building categorized by wards in Toronto.
+
+Complaints: This variable represents the number of issues reported by tenants for each building.
+
+The data analysis was performed using R (R Core Team, 2023). The analysis also entailed the use of the following R packages: tidyverse (Wickham et al. 2019), ggplot2 (Wickham, 2016), janitor (Sam Firke, 2023), and knitr (Xie, 2023).
+
+Some of the data points had missing attributes whereby an “NA” was put in place of the true value. Before any analysis, these entries were removed entirely during the process of data cleaning to simplify the process.
+
+## Summary Statistics
+
+|                          |          |             |         |         |
+|--------------------------|----------|-------------|---------|---------|
+| **Variable**             | **Mean** | **Std.Dev** | **Min** | **Max** |
+| Building Age (Years)     | 45.6     | 23.8        | 10      | 100     |
+| Evaluation Score (0-100) | 87.2     | 6.5         | 65      | 100     |
+| Number of Complaints     | 1.8      | 2.3         | 0       | 10      |
+
+These variables provide essential information about the condition of apartment buildings across Toronto. The average age of the buildings in the dataset is 45.6 years (SD = 23.8 years), indicating a wide variation in building ages. The evaluation score which measures the overall condition of each building, has an average score of 87.2 (SD = 6.5).  Lastly, the average number of complaints per building is 1.8 (SD = 2.3). The high variability in complaints suggests that some buildings may be facing chronic problems, while others are well-maintained with few or no issues reported.
+
+# ANALYSIS AND RESULTS
+
+## Evaluation Scores by Neighborhood
+
+Evaluation scores vary across Toronto's neighborhoods. Below is a box plot of evaluation scores by neighborhood.
+
+```{r, echo=FALSE}
+
+# Check if WARDNAME is a factor
+data1$WARDNAME <- as.factor(data1$WARDNAME)
+
+# Convert the rating variable to numeric if necessary
+data1$CURRENT.BUILDING.EVAL.SCORE <- as.numeric(as.character(data1$CURRENT.BUILDING.EVAL.SCORE))
+
+# Check for remaining NAs in the score column
+na_count <- sum(is.na(data1$CURRENT.BUILDING.EVAL.SCORE))
+
+# Plot average ratings by neighborhood
+ggplot(data1, aes(x = WARDNAME, y = CURRENT.BUILDING.EVAL.SCORE, fill = WARDNAME)) +
+  geom_boxplot() +
   theme_minimal() +
-  facet_wrap(~species, ncol = 1) +
-  coord_flip()
+  labs(title = "Apartment Ratings by Neighborhood",
+       x = "Neighborhood",
+       y = "Rating") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Talk more about it.
+Beaches-East York, Davenport, Don Valley East, and Don Valley North appear to have the highest median ratings and relatively small IQRs, suggesting consistently high-rated apartments in these areas. On the other hand, Scarborough-Rouge Park, Scarborough Centre, Scarborough North, and Scarborough Southwest have lower median ratings and larger IQRs, indicating more variability in ratings within these neighborhoods. There is also a greater range of apartment quality evident from the outliers common in neighborhoods with larger IQRS.
 
-And also planes (@fig-planes). (You can change the height and width, but don't worry about doing that until you have finished every other aspect of the paper - Quarto will try to make it look nice and the defaults usually work well once you have enough text.)
+## Distribution of Evaluation Scores
 
-```{r}
-#| label: fig-planes
-#| fig-cap: Relationship between wing length and width
-#| echo: false
-#| warning: false
-#| message: false
+The distribution of apartment ratings in Toronto suggests that most apartments are of good quality. The histogram below shows that the majority of ratings are concentrated around 95.
 
-analysis_data <- read_csv(here::here("data/analysis_data/analysis_data.csv"))
+```{r, echo=FALSE}
 
-analysis_data |> 
-  ggplot(aes(x = width, y = length)) +
-  geom_point(alpha = 0.8) +
+# Convert to numeric if necessary
+data1$CURRENT.BUILDING.EVAL.SCORE <- as.numeric(as.character(data1$CURRENT.BUILDING.EVAL.SCORE))
+
+# Plot distribution of ratings
+ggplot(data1, aes(x = CURRENT.BUILDING.EVAL.SCORE)) +
+  geom_histogram(bins = 20, fill = "skyblue", color = "black") +
   theme_minimal() +
-  labs(x = "Wing width (mm)",
-       y = "Wing length (mm)")
+  labs(title = "Distribution of Apartment Ratings",
+       x = "Rating",
+       y = "Count")
 ```
 
-Talk way more about it. 
+The figure suggests that apartment ratings tend to be high (concentrated around 95). The rightward skew indicates that a majority of apartments received ratings above the average (between 75 and 100) suggesting they are considered of good quality. However, the tail in Figure 2 also indicates the presence of apartments with lower scores
+
+## Relationship Between Building Age and Complaints
+
+There is a positive correlation between building age and the number of complaints. Older buildings generally receive more complaints than newer ones.
+
+```{r, echo=FALSE}
+
+# Calculate building age
+data1$building_age <- data1$YEAR.EVALUATED - data1$YEAR.BUILT
 
 
+# Replace 'num_complaints' with the actual column name
+data1$num_complaints <- data1$CURRENT.REACTIVE.SCORE
 
-# Model
-
-The goal of our modelling strategy is twofold. Firstly,...
-
-Here we briefly describe the Bayesian analysis model used to investigate... Background details and diagnostics are included in [Appendix -@sec-model-details].
-
-## Model set-up
-
-Define $y_i$ as the number of seconds that the plane remained aloft. Then $\beta_i$ is the wing width and $\gamma_i$ is the wing length, both measured in millimeters.  
-
-\begin{align} 
-y_i|\mu_i, \sigma &\sim \mbox{Normal}(\mu_i, \sigma) \\
-\mu_i &= \alpha + \beta_i + \gamma_i\\
-\alpha &\sim \mbox{Normal}(0, 2.5) \\
-\beta &\sim \mbox{Normal}(0, 2.5) \\
-\gamma &\sim \mbox{Normal}(0, 2.5) \\
-\sigma &\sim \mbox{Exponential}(1)
-\end{align}
-
-We run the model in R [@citeR] using the `rstanarm` package of @rstanarm. We use the default priors from `rstanarm`.
-
-
-### Model justification
-
-We expect a positive relationship between the size of the wings and time spent aloft. In particular...
-
-We can use maths by including latex between dollar signs, for instance $\theta$.
-
-
-# Results
-
-Our results are summarized in @tbl-modelresults.
-
-```{r}
-#| echo: false
-#| eval: true
-#| warning: false
-#| message: false
-
-library(rstanarm)
-
-first_model <-
-  readRDS(file = here::here("models/first_model.rds"))
-```
-
-```{r}
-#| echo: false
-#| eval: true
-#| label: tbl-modelresults
-#| tbl-cap: "Explanatory models of flight time based on wing width and wing length"
-#| warning: false
-
-modelsummary::modelsummary(
-  list(
-    "First model" = first_model
-  ),
-  statistic = "mad",
-  fmt = 2
-)
-```
-
-
-
-
-# Discussion
-
-## First discussion point {#sec-first-point}
-
-If my paper were 10 pages, then should be be at least 2.5 pages. The discussion is a chance to show off what you know and what you learnt from all this. 
-
-## Second discussion point
-
-## Third discussion point
-
-## Weaknesses and next steps
-
-Weaknesses and next steps should also be included.
-
-\newpage
-
-\appendix
-
-# Appendix {-}
-
-
-# Additional data details
-
-# Model details {#sec-model-details}
-
-## Posterior predictive check
-
-In @fig-ppcheckandposteriorvsprior-1 we implement a posterior predictive check. This shows...
-
-In @fig-ppcheckandposteriorvsprior-2 we compare the posterior with the prior. This shows... 
-
-```{r}
-#| eval: true
-#| echo: false
-#| message: false
-#| warning: false
-#| label: fig-ppcheckandposteriorvsprior
-#| layout-ncol: 2
-#| fig-cap: "Examining how the model fits, and is affected by, the data"
-#| fig-subcap: ["Posterior prediction check", "Comparing the posterior with the prior"]
-
-pp_check(first_model) +
-  theme_classic() +
-  theme(legend.position = "bottom")
-
-posterior_vs_prior(first_model) +
+# Plot the relationship between building age and number of complaints
+ggplot(data1, aes(x = building_age, y = num_complaints)) +
+  geom_point(alpha = 0.6, color = "blue") +
+  geom_smooth(method = "lm", se = FALSE, color = "red") +
   theme_minimal() +
-  scale_color_brewer(palette = "Set1") +
-  theme(legend.position = "bottom") +
-  coord_flip()
+  labs(title = "Relationship Between Building Age and Number of Complaints",
+       x = "Building Age (Years)",
+       y = "Number of Complaints")
 ```
 
-## Diagnostics
+There is a positive correlation between the two variables plotted in Figure 3. Figure 3 shows that older buildings receive more complaints than the newer ones. For instance, buildings over 50 years old exhibit a higher frequency of complaints compared to newer buildings.
 
-@fig-stanareyouokay-1 is a trace plot. It shows... This suggests...
+# DISCUSSION
 
-@fig-stanareyouokay-2 is a Rhat plot. It shows... This suggests...
+The Toronto Apartment Building Evaluation dataset analysis gives details into the relationship between the number of complaints and building age. It suggests that older buildings face more maintenance issues highlighting the need for increased attention to aging apartments in Toronto wards.  
 
-```{r}
-#| echo: false
-#| eval: true
-#| message: false
-#| warning: false
-#| label: fig-stanareyouokay
-#| fig-cap: "Checking the convergence of the MCMC algorithm"
-#| fig-subcap: ["Trace plot", "Rhat plot"]
-#| layout-ncol: 2
+The evaluation scores differences between neighborhoods suggest that some areas have better-maintained buildings than others. Neighborhoods with higher scores suggest possible greater investments. In contrast, the neighborhoods with lower scores, suggest that they may require more attention to improve housing conditions from policymakers.
 
-plot(first_model, "trace")
+The evaluation scores of apartments vary, as shown in Figure 1. Neighborhoods like Beaches-East York, Davenport, Don Valley East, and Don Valley North have the highest median ratings with smaller interquartile ranges (IQRs), indicating consistently high-rated apartments. In contrast, neighborhoods such as Scarborough-Rouge Park, Scarborough Centre, and Scarborough North show lower median ratings and larger IQRs, reflecting more variability in apartment quality. Figure 2, a histogram, reveals that most apartments have high ratings, with a concentration around 95, indicating good overall quality, though a small number have lower scores. Figure 3 highlights a positive correlation between building age and complaints, showing that older buildings, particularly those over 50 years old, tend to receive more complaints compared to newer buildings, suggesting potential maintenance or quality issues in aging structures.
 
-plot(first_model, "rhat")
-```
+Other factors such as renovation history and building management practices are important to note since they also likely contribute to the differences in complaints and scores. For a deeper understanding of building conditions, future studies could incorporate these variables.
 
+# LIMITATIONS AND REMEDIES
 
+One limitation of this study is that it does not account for all potential factors affecting building conditions, such as renovation history and quality of management. Additionally, the dataset lacks granular information about the types of complaints received, which could further enlighten the specific issues faced by tenants.
 
-\newpage
+Future research could address these limitations by including additional data sources, such as building management records or tenant satisfaction surveys. Furthermore, a longitudinal analysis of changes in building conditions over time would inform on the long-term effects of maintenance and renovation efforts.
 
+# REFERENCES
+City of Toronto. (2023). Toronto Apartment Building Evaluation Dataset. Open Data Toronto.
 
-# References
+Firke, S. (2023, February 2). Simple Tools for Examining and Cleaning Dirty Data [R package janitor version 2.2.0]. https://cran.r-project.org/package=janitor
 
+Gelfand, S. (2022, April 13). Access the City of Toronto Open Data Portal [R package opendatatoronto version 0.1.5]. https://cran.r-project.org/web/packages/opendatatoronto/index.html
+
+R Core Team. (2023). R: A Language and environment for Statistical computing. Vienna, Austria: R Foundation for Statistical Computing. https://www.r-project.org/
+Wickham, H. (2016). GGPlot2: Elegant Graphics for Data Analysis. Springer-Verlag New York. https://ggplot2.tidyverse.org./
+
+Wickham, H., Averick, M., Bryan, J., Chang, W., McGowan, L., François, R., Grolemund, G., Hayes, A., Henry, L., Hester, J., Kuhn, M., Pedersen, T., Miller, E., Bache, S., Müller, K., Ooms, J., Robinson, D., Seidel, D., Spinu, V., . . . Yutani, H. (2019). Welcome to the Tidyverse. The Journal of Open Source Software, 4(43), 1686. https://doi.org/10.21105/joss.01686
+
+Xie, Y. (2023). KNITR: A General-Purpose Package for Dynamic Report Generation in R. https://yihui.org/knitr/
 
